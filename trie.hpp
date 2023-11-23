@@ -3,21 +3,22 @@
 using namespace std;
 
 struct Vertex {
-    string alphabet;
+    wstring alphabet;
     bool exist;
-    unordered_map<string, Vertex*> child;
-    Vertex(string a): alphabet(a), exist(false) { }
+    unordered_map<wstring, Vertex*> child;
+    Vertex(wstring a): alphabet(a), exist(false) { }
 };
 
 class Trie
 {
 private:
     Vertex* root;
-    static vector<string> characters;
+    static vector<wstring> characters;
+    uint8_t _n;
 public:
-    Trie() { root = new Vertex("!"); }
-    void insert(string word);
-    void dfs(Vertex* cur, string word, vector<string>& result);
-    vector<string> getWords(string prefix);
+    Trie(uint8_t n) : _n(n) { root = new Vertex(L"!"); }
+    void insert(wstring word);
+    void dfs(Vertex* cur, wstring word, vector<wstring>& result);
+    vector<wstring> getWords(wstring prefix);
 
 };

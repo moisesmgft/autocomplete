@@ -1,29 +1,35 @@
 #include "trie.cpp"
 
 int main() {
-    Trie trie;
+    Trie trie(5);
 
-    std::string file_path = "american-english"; 
-    std::ifstream file(file_path);
+    std::wifstream file("american-english");
+    file.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+    std::wcout.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+    std::wcin.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+
+
     if (!file.is_open()) {
-        std::cerr << "Erro abrindo arquivo: " << file_path << std::endl;
+        std::wcerr << L"Error opening file!" << std::endl;
         return 1;
     }
 
-    std::string word;
+    std::wstring word;
     while (std::getline(file, word))
         trie.insert(word);
 
     file.close();
 
-    cout << "Created!\n";
-    string prefix; vector<string> res;
+    wcout << L"Created!\n";
+    std::wstring prefix;
+    std::vector<std::wstring> res;
 
-    while (cin >> prefix) {
-        for (auto r: trie.getWords(prefix))
-            cout << r << ", ";
-        cout << endl;
-        
+    while (std::wcin >> prefix) {
+        res = trie.getWords(prefix);
+        for (const auto &r : res)
+            std::wcout << r << L", ";
+        std::wcout << std::endl;
     }
-    
+
+    return 0;
 }
