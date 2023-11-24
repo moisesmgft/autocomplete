@@ -43,7 +43,7 @@ public:
 
         // Saving FST stats
         fst_stats.creation_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        // fst_stats.memory = fst_.getMemoryUsage();
+        fst_stats.memory = fst_.getMemoryUsage();
 
         file.close();
 
@@ -91,7 +91,7 @@ private:
 
         mvprintw(4, 1, "Estatisticas | FST           | Trie           |");
         mvprintw(5, 1, "Criação (ms) | %-11lld | %-14lld |", fst_stats.creation_time, trie_stats.creation_time);
-        mvprintw(6, 1, "Memória (kb) | %-12zu | %-14zu |", fst_stats.memory, trie_stats.memory/1000);
+        mvprintw(6, 1, "Memória (kb) | %-12zu | %-14zu |", fst_stats.memory/1000, trie_stats.memory/1000);
         mvprintw(7, 1, "  Busca (us) | %-13lld | %-14lld |", fst_stats.search_time / 1000, trie_stats.search_time / 1000);
 
 

@@ -101,12 +101,24 @@ void Automaton::_dfs(state* currentState, std::string path, int max, int* n, std
         return;
     }
 
+    for (char c = 'A'; c <= 'Z'; ++c) { // Iterate through the alphabet
+        state* nextState = currentState->getTransition(c);
+        if (nextState != nullptr) {
+            _dfs(nextState, path + c, max, n, result); // Recursively call dfs for the next state
+        }
+    }
+
     for (char c = 'a'; c <= 'z'; ++c) { // Iterate through the alphabet
         state* nextState = currentState->getTransition(c);
         if (nextState != nullptr) {
             _dfs(nextState, path + c, max, n, result); // Recursively call dfs for the next state
         }
     }
+    state* nextState = currentState->getTransition('\'');
+    if (nextState != nullptr) {
+        _dfs(nextState, path + '\'', max, n, result); // Recursively call dfs for the next state
+    }
+    
     return;
 }
 
