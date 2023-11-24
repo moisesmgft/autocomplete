@@ -1,5 +1,4 @@
 #include "fst.hpp"
-#include <string>
 
 
 bool state::isFinal(){
@@ -44,7 +43,7 @@ state* Automaton::findMinimized(state& s) {
     return dict[hash];
 }
 
-state* Automaton::createMininmalTranducerForList(std::vector<std::string> input) {
+state* Automaton::createMininmalTranducerForList() {
     state* tempStates[MAX_WORD_SIZE];
     state initialState;
     std::string previousWord, currentWord;
@@ -113,5 +112,8 @@ std::vector<std::string>  Automaton::dfs(state* initialState, std::string path, 
         _dfs(initialState, path, max, &n, result);
         return result;
     }
-    
+}
+
+void Automaton::insert(std::string word) {
+    input.push_back(word);
 }

@@ -4,6 +4,8 @@
 #include <chrono>
 #include <fstream>
 #include "lib/trie.hpp"
+#include "lib/fst.hpp"
+
 
 class Statistics {
 public:
@@ -13,7 +15,7 @@ public:
 
 class Interface {
 public:
-    Interface() : trie_(10) {
+    Interface() : trie_(10), fst_() {
 
         std::ifstream file("data/american-english");
 
@@ -27,6 +29,21 @@ public:
         // Saving Trie stats
 		trie_stats.creation_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 		trie_stats.memory = trie_.getMemoryUsage();
+
+        //Creating FST
+        begin = std::chrono::steady_clock::now();
+        // go to the beginning of the file
+        file.clear();
+        file.seekg(0, std::ios::beg);
+        while (std::getline(file, word))
+            fst_.insert(word);
+        
+        fst_.initialState = fst_.createMininmalTranducerForList();
+        end = std::chrono::steady_clock::now();        
+
+        // Saving FST stats
+        fst_stats.creation_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        // fst_stats.memory = fst_.getMemoryUsage();
 
         file.close();
 
@@ -49,8 +66,10 @@ public:
 private:
 
 	Trie trie_;
+    Automaton fst_;
 	Statistics fst_stats, trie_stats;
 	std::vector<std::string> trie_results;
+	std::vector<std::string> fst_results;
 
     char userInput[100];
     void (*currentFunction)();
@@ -123,6 +142,11 @@ private:
 			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 			trie_stats.search_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 
+            // FST search
+            begin = std::chrono::steady_clock::now();
+            fst_results = fst_.dfs(fst_.initialState, userInput, 10);
+            end = std::chrono::steady_clock::now();
+            fst_stats.search_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 		}
 
 		trie_stats.search_time /= 25;
