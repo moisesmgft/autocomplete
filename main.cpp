@@ -15,7 +15,7 @@ struct Statistics {
 
 class Interface {
 public:
-    Interface() : trie_(10), fst_() {
+    Interface() : trie_(30), fst_() {
 
         std::ifstream file("data/american-english");
 
@@ -43,7 +43,7 @@ public:
 
         // Saving FST stats
         fst_stats.creation_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        // fst_stats.memory = fst_.getMemoryUsage();
+        fst_stats.memory = fst_.getMemoryUsage();
 
         file.close();
 
@@ -71,7 +71,7 @@ private:
 	Statistics fst_stats, trie_stats;
 	std::vector<std::string> trie_results;
 	std::vector<std::string> fst_results;
-    bool use_levenshtein_=false;
+    bool use_levenshtein_=false, use_fst_=true;
 
     char userInput[100];
     void (*currentFunction)();
@@ -85,26 +85,29 @@ private:
 
     void drawInterface() {
 
-        clearLines({1,2,10,11,12,13,14,15,16,17,18,19});
+        clearLines({1,2,3,11,12,13,14,15,16,17,18,19,20});
 
-        mvprintw(1,1, "Pressione F2 para %s o Levenshtein-Automata", (use_levenshtein_)?"desativar":"ativar");
+        mvprintw(1,1, "Pressione F1 para %s", (use_fst_)?"Trie":"FST");
+        mvprintw(2,1, "Pressione F2 para %s o Levenshtein-Automata", (use_levenshtein_)?"desativar":"ativar");
 
-        mvprintw(4, 1, "Estatisticas | FST           | Trie           |");
-        mvprintw(5, 1, "Criação (ms) | %-11lld | %-14lld |", fst_stats.creation_time, trie_stats.creation_time);
-        mvprintw(6, 1, "Memória (kb) | %-12zu | %-14zu |", fst_stats.memory, trie_stats.memory/1000);
-        mvprintw(7, 1, "  Busca (us) | %-13lld | %-14lld |", fst_stats.search_time / 1000, trie_stats.search_time / 1000);
+        mvprintw(5, 1, "Estatisticas | FST           | Trie           |");
+        mvprintw(6, 1, "Criação (ms) | %-11lld | %-14lld |", fst_stats.creation_time, trie_stats.creation_time);
+        mvprintw(7, 1, "Memória (kb) | %-12zu | %-14zu |", fst_stats.memory/1000, trie_stats.memory/1000);
+        mvprintw(8, 1, "  Busca (us) | %-13lld | %-14lld |", fst_stats.search_time / 1000, trie_stats.search_time / 1000);
 
 
 		mvprintw(9,1, "Resultados: %zu %zu", trie_results.size(), fst_results.size());
 
-        for(long unsigned int i=0; i<trie_results.size(); i++) {
-            mvprintw(10+i,1, "%s", trie_results[i].c_str());
-        }
-        for(long unsigned int i=0; i<fst_results.size(); i++) {
-            mvprintw(10+i,20, "%s", fst_results[i].c_str());
-        }
+        if (!use_fst_)
+            for(long unsigned int i=0; i<trie_results.size(); i++) {
+                mvprintw(10+i,1, "%s", trie_results[i].c_str());
+            }
+        else 
+            for(long unsigned int i=0; i<fst_results.size(); i++) {
+                mvprintw(10+i,1, "%s", fst_results[i].c_str());
+            }
 
-        mvprintw(2, 1, "User Input: %s", userInput);
+        mvprintw(3, 1, "User Input: %s", userInput);
         refresh();
     }
 
@@ -125,6 +128,9 @@ private:
         int ch = getch();
 
         switch (ch) {
+            case KEY_F(1):
+                use_levenshtein_ = !use_fst_;
+                break;
             case KEY_F(2):
                 use_levenshtein_ = !use_levenshtein_;
                 break;
