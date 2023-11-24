@@ -5,10 +5,10 @@
 #include <fstream>
 #include "lib/trie.hpp"
 #include "lib/fst.hpp"
+#include "lib/levenshtein.hpp"
 
 
-class Statistics {
-public:
+struct Statistics {
 	size_t memory;
 	long long creation_time, search_time;
 };
@@ -30,11 +30,11 @@ public:
 		trie_stats.creation_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 		trie_stats.memory = trie_.getMemoryUsage();
 
-        //Creating FST
-        begin = std::chrono::steady_clock::now();
         // go to the beginning of the file
         file.clear();
         file.seekg(0, std::ios::beg);
+        //Creating FST
+        begin = std::chrono::steady_clock::now();
         while (std::getline(file, word))
             fst_.insert(word);
         
@@ -67,9 +67,11 @@ private:
 
 	Trie trie_;
     Automaton fst_;
+
 	Statistics fst_stats, trie_stats;
 	std::vector<std::string> trie_results;
 	std::vector<std::string> fst_results;
+    bool use_levenshtein_=false;
 
     char userInput[100];
     void (*currentFunction)();
@@ -83,22 +85,26 @@ private:
 
     void drawInterface() {
 
-        mvprintw(3, 1, "Estatisticas | FST           | Trie           |");
-        mvprintw(4, 1, "Criação (ms) | %-11lld | %-14lld |", fst_stats.creation_time, trie_stats.creation_time);
-        mvprintw(5, 1, "Memória (kb) | %-12zu | %-14zu |", fst_stats.memory, trie_stats.memory/1000);
-        mvprintw(6, 1, "  Busca (us) | %-13lld | %-14lld |", fst_stats.search_time / 1000, trie_stats.search_time / 1000);
+        clearLines({1,2,10,11,12,13,14,15,16,17,18,19});
+
+        mvprintw(1,1, "Pressione F2 para %s o Levenshtein-Automata", (use_levenshtein_)?"desativar":"ativar");
+
+        mvprintw(4, 1, "Estatisticas | FST           | Trie           |");
+        mvprintw(5, 1, "Criação (ms) | %-11lld | %-14lld |", fst_stats.creation_time, trie_stats.creation_time);
+        mvprintw(6, 1, "Memória (kb) | %-12zu | %-14zu |", fst_stats.memory, trie_stats.memory/1000);
+        mvprintw(7, 1, "  Busca (us) | %-13lld | %-14lld |", fst_stats.search_time / 1000, trie_stats.search_time / 1000);
 
 
-		mvprintw(8,1, "Resultados");
+		mvprintw(9,1, "Resultados: %zu %zu", trie_results.size(), fst_results.size());
 
-        clearLines({9,10,11,12,13,14,15,16,17,18});
         for(long unsigned int i=0; i<trie_results.size(); i++) {
-            mvprintw(9+i,1, "%s", trie_results[i].c_str());
+            mvprintw(10+i,1, "%s", trie_results[i].c_str());
+        }
+        for(long unsigned int i=0; i<fst_results.size(); i++) {
+            mvprintw(10+i,20, "%s", fst_results[i].c_str());
         }
 
-
-        clearLine(1);
-        mvprintw(1, 1, "User Input: %s", userInput);
+        mvprintw(2, 1, "User Input: %s", userInput);
         refresh();
     }
 
@@ -119,6 +125,9 @@ private:
         int ch = getch();
 
         switch (ch) {
+            case KEY_F(2):
+                use_levenshtein_ = !use_levenshtein_;
+                break;
             case KEY_BACKSPACE:
             case 127:
                 if (strlen(userInput) > 0)
@@ -130,10 +139,12 @@ private:
                 break;
         }
 
+        int runs = 25;
+		int i=runs;
+        
+		trie_stats.search_time = 0; fst_stats.search_time = 0;
 
-		int i=25;
-		trie_stats.search_time = 0;
-
+        SparseLevenshteinAutomaton automaton(userInput, 1);
 		while (i--) {
 
             // Trie search
@@ -142,14 +153,21 @@ private:
 			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 			trie_stats.search_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 
+            if(use_levenshtein_) 
+                trie_results = automaton.filter(trie_results);
+            
             // FST search
             begin = std::chrono::steady_clock::now();
-            fst_results = fst_.dfs(fst_.initialState, userInput, 10);
+            fst_results = fst_.dfs(fst_.initialState, userInput, 10, 0);
             end = std::chrono::steady_clock::now();
-            fst_stats.search_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+            fst_stats.search_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+
+            if(use_levenshtein_) 
+                fst_results = automaton.filter(fst_results);
+
 		}
 
-		trie_stats.search_time /= 25;
+		trie_stats.search_time /= runs; fst_stats.search_time /= runs;
 
     }
 };

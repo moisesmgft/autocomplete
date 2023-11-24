@@ -2,11 +2,11 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -Werror
+CFLAGS = -Wall
 
 # Source files
 SRCDIR = lib
-SOURCES = $(SRCDIR)/*.cpp main.cpp
+SOURCES = $(SRCDIR)/fst.cpp $(SRCDIR)/trie.cpp $(SRCDIR)/levenshtein.cpp main.cpp
 
 # Object files
 OBJECTS = $(SOURCES:.cpp=.o)

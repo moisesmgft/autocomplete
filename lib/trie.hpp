@@ -1,3 +1,6 @@
+#ifndef TRIE_HPP
+#define TRIE_HPP
+
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -27,3 +30,5 @@ public:
     std::vector<std::string> getWords(std::string prefix);
     size_t getMemoryUsage();
 };
+
+#endif // TRIE_HPP
