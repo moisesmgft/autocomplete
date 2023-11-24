@@ -1,6 +1,6 @@
 #include "trie.hpp"
 
-vector<wstring> Trie::characters = {
+std::vector<std::wstring> Trie::characters = {
     L"A", L"B", L"C", L"D", L"E", L"F", L"G", L"H", L"I", 
     L"J", L"K", L"L", L"M", L"N", L"O", L"P", L"Q", L"R", L"S", 
     L"T", L"U", L"V", L"W", L"X", L"Y", L"Z", L"a", L"b", L"c", 
@@ -10,36 +10,41 @@ vector<wstring> Trie::characters = {
     L"é", L"ê", L"í", L"ñ", L"ó", L"ô", L"ö", L"û", L"ü", L"'"
 };
 
-void Trie::insert(wstring word) {
+void Trie::insert(std::string word) {
     Vertex* cur = root;
-    for (auto it = begin(word); it != end(word); ++it) {
-        const wstring idx(it,it+1); 
-        if (!cur->child.count(idx))
+
+    const std::wstring wide = converter_.from_bytes(word);
+    for (auto it = begin(wide); it != end(wide); ++it) {
+        const std::wstring idx(it,it+1);
+        if (!cur->child.count(idx)) {
             cur->child[idx] = new Vertex(idx);
+            memory_ += sizeof(Vertex*) + sizeof(Vertex);
+        }
         cur = cur->child[idx];
     }
     cur->exist = true;
 }
 
-void Trie::dfs(Vertex* cur, wstring word, vector<wstring>& result) {
-    if (result.size()==_n) return;
+void Trie::dfs(Vertex* cur, std::string word, std::vector<std::string>& result) {
+    if (result.size()==n_) return;
     if (cur->exist)
         result.push_back(word);
     for (auto s: characters) {
         if (cur->child.count(s)) {
-            word += s;
+            word += converter_.to_bytes(s);
             dfs(cur->child[s], word, result);
             word.pop_back();
         }
     }
 }
 
-vector<wstring> Trie::getWords(wstring prefix) {
+std::vector<std::string> Trie::getWords(std::string prefix) {
     Vertex* cur = root;
-    vector<wstring> result;
+    std::vector<std::string> result;
 
-    for (auto it = begin(prefix); it != end(prefix); ++it) {
-        const wstring idx(it,it+1); 
+    const std::wstring wide = converter_.from_bytes(prefix);
+    for (auto it = begin(wide); it != end(wide); ++it) {
+        const std::wstring idx(it,it+1); 
         if (!cur->child.count(idx))
             return result;
         cur = cur->child[idx];
@@ -47,3 +52,7 @@ vector<wstring> Trie::getWords(wstring prefix) {
     dfs(cur, prefix, result);
     return result;
 } 
+
+int Trie::getMemoryUsage() {
+    return memory_;
+}
