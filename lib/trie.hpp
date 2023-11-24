@@ -22,8 +22,8 @@ private:
     void dfs(Vertex* cur, std::string word, std::vector<std::string>& result);
 public:
     Trie() = default;
-    Trie(uint8_t n) : n_(n), memory_(0) { root = new Vertex(L"!"); }
+    Trie(uint8_t n) : n_(n), memory_(sizeof(Trie)) { root = new Vertex(L"!"); }
     void insert(std::string word);
     std::vector<std::string> getWords(std::string prefix);
-    int getMemoryUsage();
+    size_t getMemoryUsage();
 };

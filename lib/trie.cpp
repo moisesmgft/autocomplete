@@ -18,7 +18,7 @@ void Trie::insert(std::string word) {
         const std::wstring idx(it,it+1);
         if (!cur->child.count(idx)) {
             cur->child[idx] = new Vertex(idx);
-            memory_ += sizeof(Vertex*) + sizeof(Vertex);
+            memory_ += sizeof(Vertex);
         }
         cur = cur->child[idx];
     }
@@ -39,6 +39,7 @@ void Trie::dfs(Vertex* cur, std::string word, std::vector<std::string>& result) 
 }
 
 std::vector<std::string> Trie::getWords(std::string prefix) {
+    if (prefix.empty()) return {};
     Vertex* cur = root;
     std::vector<std::string> result;
 
@@ -53,6 +54,6 @@ std::vector<std::string> Trie::getWords(std::string prefix) {
     return result;
 } 
 
-int Trie::getMemoryUsage() {
+size_t Trie::getMemoryUsage() {
     return memory_;
 }

@@ -7,9 +7,8 @@
 
 class Statistics {
 public:
-	uint64_t memory;
-	int64_t creation;
-	int64_t search;
+	size_t memory;
+	long long creation_time, search_time;
 };
 
 class Interface {
@@ -18,11 +17,16 @@ public:
 
         std::ifstream file("data/american-english");
 
+        // Creating Trie
 		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        std::string word;
+        while (std::getline(file, word))
+            trie_.insert(word);
 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-		trie_stats.creation = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-		//trie_stats.memory = trie_.getMemoryUsage();
+        // Saving Trie stats
+		trie_stats.creation_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+		trie_stats.memory = trie_.getMemoryUsage();
 
         file.close();
 
@@ -60,12 +64,18 @@ private:
 
     void drawInterface() {
 
-		mvprintw(3, 1, "Estatisticas |         FST |        Trie |");
-		mvprintw(4, 1, "     Criação |");
-		mvprintw(5, 1, "     Memória |");
-		mvprintw(6, 1, "       Busca |");
+        mvprintw(3, 1, "Estatisticas | FST           | Trie           |");
+        mvprintw(4, 1, "Criação (ms) | %-11lld | %-14lld |", fst_stats.creation_time, trie_stats.creation_time);
+        mvprintw(5, 1, "Memória (kb) | %-12zu | %-14zu |", fst_stats.memory, trie_stats.memory/1000);
+        mvprintw(6, 1, "  Busca (us) | %-13lld | %-14lld |", fst_stats.search_time / 1000, trie_stats.search_time / 1000);
+
 
 		mvprintw(8,1, "Resultados");
+
+        clearLines({9,10,11,12,13,14,15,16,17,18});
+        for(long unsigned int i=0; i<trie_results.size(); i++) {
+            mvprintw(9+i,1, "%s", trie_results[i].c_str());
+        }
 
 
         clearLine(1);
@@ -101,19 +111,21 @@ private:
                 break;
         }
 
-		int i=5;
-		trie_stats.search = 0;
+
+		int i=25;
+		trie_stats.search_time = 0;
 
 		while (i--) {
 
+            // Trie search
 			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 			trie_results = trie_.getWords(userInput);
 			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-			trie_stats.search += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+			trie_stats.search_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 
 		}
 
-		trie_stats.search /= 5;
+		trie_stats.search_time /= 25;
 
     }
 };
