@@ -6,6 +6,10 @@ class state {
 public:
     std::unordered_map<char, state*> _transitions;
     bool _isFinal = false;
+    int _id;
+    state(int id) {
+        _id = id;
+    }
 
     bool isFinal();
     state* getTransition(char c);
