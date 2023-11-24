@@ -30,5 +30,7 @@ public:
     state* createMininmalTranducerForList();
     void _dfs(state* currentState, std::string path, int max, int* n, std::vector<std::string>& result);
     std::vector<std::string> dfs(state* initialState, std::string path, int max, int current = 0);
-
+    size_t getMemoryUsage();
+private:
+    size_t memory_;
 };

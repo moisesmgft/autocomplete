@@ -88,6 +88,7 @@ state* Automaton::createMininmalTranducerForList() {
 void Automaton::_dfs(state* currentState, std::string path, int max, int* n, std::vector<std::string>& result) {
     if (currentState->isFinal() && *n < max) {
         (*n)++;
+        result.push_back(path);
         return;
     } else if (*n == max) {
         return;
@@ -101,11 +102,11 @@ void Automaton::_dfs(state* currentState, std::string path, int max, int* n, std
     }
 }
 
-std::vector<std::string>  Automaton::dfs(state* initialState, std::string path, int max, int current = 0){
+std::vector<std::string>  Automaton::dfs(state* initialState, std::string path, int max, int current){
     int n = 0;
     state* nextState = initialState->getTransition(path[current]);
     if (nextState != nullptr) {
-        dfs(nextState, path, max, ++current); // Recursively call dfs for the next state
+        return dfs(nextState, path, max, ++current); // Recursively call dfs for the next state
     }
     else {
         std::vector<std::string> result;
@@ -116,4 +117,8 @@ std::vector<std::string>  Automaton::dfs(state* initialState, std::string path, 
 
 void Automaton::insert(std::string word) {
     input.push_back(word);
+}
+
+size_t Automaton::getMemoryUsage() {
+    return sizeof(state) * dict.size();
 }
