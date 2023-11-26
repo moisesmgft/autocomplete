@@ -4,6 +4,7 @@ int j = 0;
 bool state::isFinal(){
     return _isFinal;
 }
+
 state*state:: getTransition(char c){
     return _transitions[c];
 }
@@ -12,14 +13,7 @@ void state::setFinal(bool value){
     _isFinal = value;
 }
 void state::setTransition(char c, state* s){
-    if(_transitions.find(c) == _transitions.end())
-        _transitions[c] = s;
-    else {
-        if(_transitions[c]->isFinal())
-            s->setFinal(true);
-        _transitions[c] = s;
-    }
-
+    _transitions[c] = s;
 }
 void state::clear(){
     _transitions.clear();
@@ -39,7 +33,6 @@ std::string state::getHash(){
         hash += pair.first; // Append transition character
         hash += std::to_string(_id); // Append memory address of state
     }
-    if(_isFinal) hash += "isFinal";
     return hash;
 }
 
@@ -67,11 +60,11 @@ state* Automaton::createMininmalTranducerForList() {
 
     for(int k = 0; k < input.size(); k++) {
         currentWord = input[k];
-        i = 1;
-        while(i < std::min(previousWord.size(), currentWord.size()) && previousWord[i-1] == currentWord[i-1]) 
+        i = 0;
+        while(i < std::min(previousWord.size(), currentWord.size()) && previousWord[i] == currentWord[i]) 
             i++;
 
-        prefixLengthPlus1 = i;
+        prefixLengthPlus1 = i + 1;
 
         for(i = previousWord.size(); i >= prefixLengthPlus1; i--) 
             tempStates[i-1]->setTransition(previousWord[i-1], findMinimized(*tempStates[i]));

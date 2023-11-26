@@ -3,6 +3,7 @@
 #include <vector>
 #include <chrono>
 #include <fstream>
+#include <algorithm>
 #include "lib/trie.hpp"
 #include "lib/fst.hpp"
 #include "lib/levenshtein.hpp"
@@ -37,6 +38,8 @@ public:
         begin = std::chrono::steady_clock::now();
         while (std::getline(file, word))
             fst_.insert(word);
+        
+        std::sort(fst_.input.begin(), fst_.input.end());
         
         fst_.initialState = fst_.createMininmalTranducerForList();
         end = std::chrono::steady_clock::now();        

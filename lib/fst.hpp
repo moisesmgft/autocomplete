@@ -1,7 +1,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
+#include <locale>
+#include <codecvt>
 class state {
 public:
     std::unordered_map<char, state*> _transitions;
@@ -25,8 +26,9 @@ public:
 class Automaton {
 public:
     const int MAX_WORD_SIZE = 120000;
-    std::unordered_map<std::string,state*> dict;
     std::vector<std::string> input;
+    std::unordered_map<std::string,state*> dict;
+
     state* initialState;
     
     void insert(std::string word);
@@ -38,3 +40,4 @@ public:
 private:
     size_t memory_;
 };
+
