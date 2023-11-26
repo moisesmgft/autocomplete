@@ -12,7 +12,14 @@ void state::setFinal(bool value){
     _isFinal = value;
 }
 void state::setTransition(char c, state* s){
-    _transitions[c] = s;
+    if(_transitions.find(c) == _transitions.end())
+        _transitions[c] = s;
+    else {
+        if(_transitions[c]->isFinal())
+            s->setFinal(true);
+        _transitions[c] = s;
+    }
+
 }
 void state::clear(){
     _transitions.clear();
@@ -71,12 +78,7 @@ state* Automaton::createMininmalTranducerForList() {
 
         for(i = prefixLengthPlus1; i <= currentWord.size(); i++) {
             tempStates[i]->clear();
-            if(tempStates[i-1]->getTransition(currentWord[i-1]) == nullptr)
-                tempStates[i-1]->setTransition(currentWord[i-1], tempStates[i]);
-            else {
-                tempStates[i]->copy(*tempStates[i-1]->getTransition(currentWord[i-1]));
-                tempStates[i-1]->setTransition(currentWord[i-1], tempStates[i]);
-            }
+            tempStates[i-1]->setTransition(currentWord[i-1], tempStates[i]);
         }
         if(previousWord != currentWord) tempStates[currentWord.size()]->setFinal(true);
         previousWord = currentWord;
